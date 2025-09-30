@@ -39,9 +39,20 @@ type UserBook = {
     id: string
     title: string
     author: string
+    description: string | null
+    file_url: string
+    genre_id: string | null
+    file_size_bytes: number | null
     status: string
-    created_at: string
-    download_count: number
+    is_public: boolean
+    upload_at: string
+    published_at: string | null
+    upload_by: string
+    approved_by: string | null
+    approved_at: string | null
+    tags: string[] | null
+    updated_at: string
+    version: number | null
     genres: {
         name: string
     } | null
@@ -75,14 +86,19 @@ export default function ProfilePage() {
                 },
                 created_at: session.user.created_at
             })
-            // Fetch user's uploaded books
+
+            // Fetch user's uploaded books using upload_by column
             const { data: books, error } = await supabase
                 .from("books")
                 .select("*, genres(name)")
-                .eq("created_by", session.user.id)
-                .order("created_at", { ascending: false })
+                .eq("upload_by", session.user.id)
+                .order("upload_at", { ascending: false })
 
-            if (!error && books) {
+            if (error) {
+                console.error("Error fetching books:", error)
+            }
+
+            if (books) {
                 setUserBooks(books as UserBook[])
             }
 
@@ -96,6 +112,9 @@ export default function ProfilePage() {
         if (!user) return
 
         setSaving(true)
+        // Add profile update logic here if needed
+        setSaving(false)
+        setEditing(false)
     }
 
     const handleLogout = async () => {
@@ -118,6 +137,16 @@ export default function ProfilePage() {
         })
     }
 
+    const formatFileSize = (bytes: number | null) => {
+        if (!bytes) return "Unknown size"
+
+        const sizes = ['Bytes', 'KB', 'MB', 'GB']
+        if (bytes === 0) return '0 Bytes'
+
+        const i = Math.floor(Math.log(bytes) / Math.log(1024))
+        return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i]
+    }
+
     const getStatusBadge = (status: string) => {
         const statusConfig = {
             pending: { variant: "secondary" as const, label: "Pending" },
@@ -133,6 +162,18 @@ export default function ProfilePage() {
     // Helper function to get avatar URL
     const getAvatarUrl = () => {
         return user?.user_metadata?.avatar_url || user?.user_metadata?.picture || ""
+    }
+
+    const handleEditBook = (bookId: string) => {
+        // Navigate to edit book page
+        router.push(`/books/edit/${bookId}`)
+    }
+
+    const handleDownloadBook = async (book: UserBook) => {
+        // Implement download logic
+        if (book.file_url) {
+            window.open(book.file_url, '_blank')
+        }
     }
 
     if (loading) {
@@ -152,7 +193,7 @@ export default function ProfilePage() {
 
     return (
         <div className="min-h-[calc(100vh-120px)]">
-            <div className="max-w-4xl mx-auto px-4 py-8">
+            <div className="max-w-6xl mx-auto px-4 py-8">
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
                     <div>
@@ -160,6 +201,16 @@ export default function ProfilePage() {
                         <p className="text-muted-foreground mt-2">
                             Manage your account and view your uploaded books
                         </p>
+                    </div>
+                    <div className="flex gap-2">
+                        <Button
+                            variant="outline"
+                            onClick={handleLogout}
+                            className="flex items-center gap-2"
+                        >
+                            <LogOut className="w-4 h-4" />
+                            Logout
+                        </Button>
                     </div>
                 </div>
 
@@ -180,6 +231,9 @@ export default function ProfilePage() {
                                         </AvatarFallback>
                                     </Avatar>
                                 </div>
+                                <CardTitle className="text-xl">
+                                    {user.user_metadata?.full_name || "User"}
+                                </CardTitle>
                                 <CardDescription className="flex items-center justify-center gap-2">
                                     <Mail className="w-4 h-4" />
                                     {user.email}
@@ -202,6 +256,15 @@ export default function ProfilePage() {
                                 </div>
 
                                 <Separator />
+
+                                <div className="flex gap-2">
+                                    <Button
+                                        className="flex-1"
+                                        asChild
+                                    >
+                                        <a href="/upload">Upload New Book</a>
+                                    </Button>
+                                </div>
                             </CardContent>
                         </Card>
                     </div>
@@ -233,25 +296,59 @@ export default function ProfilePage() {
                                 ) : (
                                     <div className="space-y-4">
                                         {userBooks.map((book) => (
-                                            <div key={book.id} className="flex items-center justify-between p-4 border rounded-lg">
+                                            <div key={book.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors">
                                                 <div className="flex-1">
                                                     <div className="flex items-center gap-2 mb-2">
-                                                        <h3 className="font-semibold">{book.title}</h3>
+                                                        <h3 className="font-semibold text-lg">{book.title}</h3>
                                                         {getStatusBadge(book.status)}
+                                                        {!book.is_public && (
+                                                            <Badge variant="outline">Private</Badge>
+                                                        )}
                                                     </div>
                                                     <p className="text-sm text-muted-foreground mb-1">
                                                         by {book.author}
                                                     </p>
+                                                    {book.description && (
+                                                        <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
+                                                            {book.description}
+                                                        </p>
+                                                    )}
                                                     <div className="flex items-center gap-4 text-xs text-muted-foreground">
                                                         <span>{book.genres?.name || "Uncategorized"}</span>
                                                         <span>•</span>
-                                                        <span>Uploaded {formatDate(book.created_at)}</span>
+                                                        <span>Uploaded {formatDate(book.upload_at)}</span>
                                                         <span>•</span>
-                                                        <span className="flex items-center gap-1">
-                                                            <Download className="w-3 h-3" />
-                                                            {book.download_count} downloads
-                                                        </span>
+                                                        <span>{formatFileSize(book.file_size_bytes)}</span>
+                                                        {book.tags && book.tags.length > 0 && (
+                                                            <>
+                                                                <span>•</span>
+                                                                <span className="flex items-center gap-1">
+                                                                    Tags: {book.tags.slice(0, 3).join(', ')}
+                                                                    {book.tags.length > 3 && ` +${book.tags.length - 3} more`}
+                                                                </span>
+                                                            </>
+                                                        )}
                                                     </div>
+                                                </div>
+                                                <div className="flex items-center gap-2 ml-4">
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => handleDownloadBook(book)}
+                                                        className="flex items-center gap-1"
+                                                    >
+                                                        <Download className="w-3 h-3" />
+                                                        Download
+                                                    </Button>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => handleEditBook(book.id)}
+                                                        className="flex items-center gap-1"
+                                                    >
+                                                        <Edit3 className="w-3 h-3" />
+                                                        Edit
+                                                    </Button>
                                                 </div>
                                             </div>
                                         ))}
