@@ -300,8 +300,8 @@ export function BooksTab() {
     const getStatusBadge = (status: string) => {
         const statusConfig = {
             pending: { variant: "secondary" as const, label: "Pending", color: "text-yellow-600" },
-            approved: { variant: "default" as const, label: "Approved", color: "text-green-600" },
-            rejected: { variant: "destructive" as const, label: "Rejected", color: "text-red-600" },
+            approved: { variant: "default" as const, label: "Approved", color: "" },
+            rejected: { variant: "destructive" as const, label: "Rejected", color: "" },
             archived: { variant: "outline" as const, label: "Archived", color: "text-gray-600" }
         }
 
