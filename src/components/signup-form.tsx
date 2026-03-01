@@ -58,8 +58,8 @@ export function SignupForm({
                 console.log('Signup successful! Check your email for verification.');
             }
 
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : String(err));
         } finally {
             setLoading(false);
         }
@@ -80,8 +80,8 @@ export function SignupForm({
             }
 
             console.log('Signing up with Google!');
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : String(err));
         } finally {
             setLoading(false);
         }

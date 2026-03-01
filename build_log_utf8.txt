@@ -1,0 +1,88 @@
+﻿
+> pothpath@0.1.0 build C:\Users\Soap\Documents\elibrary-pothpath
+> next build --turbopack
+
+   Γû▓ Next.js 15.5.3 (Turbopack)
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ Γ£ô Finished writing to disk in 69ms
+node.exe : 
+At C:\Users\Soap\AppData\Roaming\npm\pnpm.
+ps1:24 char:5
++     & "node$exe"  
+"$basedir/node_modules/pnpm/bin/pnpm.cjs" 
+$args
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecifie 
+   d: (:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeComma 
+   ndError
+ 
+> Build error occurred
+Error: Turbopack build failed with 2 
+errors:
+./src/components/admin/BooksTab.tsx:35:5
+Ecmascript file had an error
+[0m [90m 33 |[39m     
+[33mDropdownMenuContent[39m[33m,[39m
+ [90m 34 |[39m     
+[33mDropdownMenuItem[39m[33m,[39m
+[31m[1m>[22m[39m[90m 35 |[39m     
+[33mDropdownMenuItem[39m[33m,[39m
+ [90m    |[39m     [31m[1m^[22m[39m
+[31m[1m^[22m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1m^[22m[39m[31m[
+1m^[22m[39m[31m[1m^[22m[39m[31m[1m
+^[22m[39m[31m[1m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[31m[1m^[22m
+[39m
+ [90m 36 |[39m     
+[33mDropdownMenuSeparator[39m[33m,[39m
+ [90m 37 |[39m     
+[33mDropdownMenuTrigger[39m[33m,[39m
+ [90m 38 |[39m } [36mfrom[39m [32m"@/
+components/ui/dropdown-menu"[39m[33m;[3
+9m[0m
+
+the name `DropdownMenuItem` is defined 
+multiple times
+
+
+./src/components/admin/BooksTab.tsx:35:5
+Ecmascript file had an error
+[0m [90m 33 |[39m     
+[33mDropdownMenuContent[39m[33m,[39m
+ [90m 34 |[39m     
+[33mDropdownMenuItem[39m[33m,[39m
+[31m[1m>[22m[39m[90m 35 |[39m     
+[33mDropdownMenuItem[39m[33m,[39m
+ [90m    |[39m     [31m[1m^[22m[39m
+[31m[1m^[22m[39m[31m[1m^[22m[39m[3
+1m[1m^[22m[39m[31m[1m^[22m[39m[31m
+[1m^[22m[39m[31m[1m^[22m[39m[31m[
+1m^[22m[39m[31m[1m^[22m[39m[31m[1m
+^[22m[39m[31m[1m^[22m[39m[31m[1m^
+[22m[39m[31m[1m^[22m[39m[31m[1m^[2
+2m[39m[31m[1m^[22m[39m[31m[1m^[22m
+[39m
+ [90m 36 |[39m     
+[33mDropdownMenuSeparator[39m[33m,[39m
+ [90m 37 |[39m     
+[33mDropdownMenuTrigger[39m[33m,[39m
+ [90m 38 |[39m } [36mfrom[39m [32m"@/
+components/ui/dropdown-menu"[39m[33m;[3
+9m[0m
+
+the name `DropdownMenuItem` is defined 
+multiple times
+
+
+    at <unknown> 
+(./src/components/admin/BooksTab.tsx:35:5)
+    at <unknown> 
+(./src/components/admin/BooksTab.tsx:35:5)
+ΓÇëELIFECYCLEΓÇë Command failed with exit code 1.

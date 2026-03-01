@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabaseClient"
 import { Button } from "@/components/ui/button"
@@ -19,9 +19,11 @@ import { AnalyticsTab } from "@/components/admin/AnalyticsTab"
 
 const ALLOWED_ADMIN_EMAILS = process.env.NEXT_PUBLIC_ALLOWED_ADMIN_EMAILS?.split(',') || []
 
+import type { User } from "@supabase/supabase-js"
+
 export default function AdminPage() {
   const router = useRouter()
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [accessDenied, setAccessDenied] = useState(false)
 
@@ -73,7 +75,7 @@ export default function AdminPage() {
           </div>
           <h1 className="text-2xl font-bold mb-2">Access Denied</h1>
           <p className="text-muted-foreground mb-6">
-            You don't have permission to access the admin panel.
+            You don&apos;t have permission to access the admin panel.
           </p>
           <Button onClick={() => router.push("/")}>
             Return to Home

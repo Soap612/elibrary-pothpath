@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabaseClient"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Search, Book, Cloud, Shield, ArrowRight, TrendingUp } from "lucide-react"
+import { Search, Book, Cloud, ArrowRight, TrendingUp } from "lucide-react"
 
 type Genre = { id: string; name: string; count: number }
 

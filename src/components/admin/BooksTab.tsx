@@ -19,7 +19,6 @@ import {
     Archive,
     MoreVertical,
     ChevronDown,
-    BarChart3,
     Download as DownloadIcon
 } from "lucide-react";
 import { Button } from "@/components/ui/button"
@@ -33,7 +32,6 @@ import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -85,6 +83,7 @@ export function BooksTab() {
 
     useEffect(() => {
         fetchBooks()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [search, status, sort, genreFilter])
 
     async function fetchGenres() {
@@ -147,15 +146,17 @@ export function BooksTab() {
                 throw error
             }
 
-            const booksData = (data || []).map(book => ({
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const booksData = (data || []).map((book: any) => ({
                 ...book,
                 genres: Array.isArray(book.genres) ? book.genres[0] : book.genres
             })) as Book[]
 
             setBooks(booksData)
-        } catch (error: any) {
-            console.error("Error fetching books:", error)
-            toast.error(`Failed to load books: ${error.message}`)
+        } catch (error: unknown) {
+            const err = error as Error;
+            console.error("Error fetching books:", err)
+            toast.error(`Failed to load books: ${err.message}`)
             setBooks([])
         } finally {
             setLoading(false)
@@ -164,7 +165,7 @@ export function BooksTab() {
 
     async function updateStatus(id: string, newStatus: Book["status"]) {
         try {
-            const updateData: any = {
+            const updateData: Record<string, string> = {
                 status: newStatus,
                 updated_at: new Date().toISOString(),
             }
@@ -187,13 +188,14 @@ export function BooksTab() {
             toast.success(`Book ${newStatus} successfully`)
 
             if (status !== "all") {
-                setBooks(prev => prev.filter(book => book.id !== id))
+                setBooks((prev: Book[]) => prev.filter((book: Book) => book.id !== id))
             } else {
                 fetchBooks()
             }
-        } catch (error: any) {
-            console.error('Error updating status:', error)
-            toast.error(`Failed to update status: ${error.message}`)
+        } catch (error: unknown) {
+            const err = error as Error;
+            console.error('Error updating status:', err)
+            toast.error(`Failed to update status: ${err.message}`)
         }
     }
 
@@ -214,7 +216,7 @@ export function BooksTab() {
 
             toast.success(`Book ${!currentVisibility ? "published" : "hidden"} successfully`)
             fetchBooks()
-        } catch (error) {
+        } catch {
             toast.error("Failed to update visibility")
         }
     }
@@ -229,7 +231,7 @@ export function BooksTab() {
         }
 
         toast.success("Book deleted successfully")
-        setBooks(prev => prev.filter(book => book.id !== id))
+        setBooks((prev: Book[]) => prev.filter((book: Book) => book.id !== id))
     }
 
     async function bulkUpdateStatus(newStatus: Book["status"]) {
@@ -241,7 +243,7 @@ export function BooksTab() {
         if (!confirm(`Are you sure you want to update ${selectedBooks.size} books to "${newStatus}"?`)) return
 
         const bookIds = Array.from(selectedBooks)
-        const updateData: any = {
+        const updateData: Record<string, string> = {
             status: newStatus,
             updated_at: new Date().toISOString(),
         }
@@ -279,7 +281,7 @@ export function BooksTab() {
         if (selectedBooks.size === books.length) {
             setSelectedBooks(new Set())
         } else {
-            setSelectedBooks(new Set(books.map(book => book.id)))
+            setSelectedBooks(new Set(books.map((book: Book) => book.id)))
         }
     }
 
@@ -311,10 +313,10 @@ export function BooksTab() {
 
     const stats = {
         total: books.length,
-        pending: books.filter(b => b.status === 'pending').length,
-        approved: books.filter(b => b.status === 'approved').length,
-        rejected: books.filter(b => b.status === 'rejected').length,
-        archived: books.filter(b => b.status === 'archived').length,
+        pending: books.filter((b: Book) => b.status === 'pending').length,
+        approved: books.filter((b: Book) => b.status === 'approved').length,
+        rejected: books.filter((b: Book) => b.status === 'rejected').length,
+        archived: books.filter((b: Book) => b.status === 'archived').length,
     }
 
     return (
@@ -383,7 +385,7 @@ export function BooksTab() {
                             />
                         </div>
 
-                        <Select value={status} onValueChange={(value: any) => setStatus(value)}>
+                        <Select value={status} onValueChange={(value: "pending" | "approved" | "rejected" | "archived" | "all") => setStatus(value)}>
                             <SelectTrigger>
                                 <Filter className="w-4 h-4 mr-2" />
                                 <SelectValue placeholder="Filter by status" />
@@ -397,7 +399,7 @@ export function BooksTab() {
                             </SelectContent>
                         </Select>
 
-                        <Select value={sort} onValueChange={(value: any) => setSort(value)}>
+                        <Select value={sort} onValueChange={(value: "newest" | "oldest" | "az" | "downloads") => setSort(value)}>
                             <SelectTrigger>
                                 <SelectValue placeholder="Sort by" />
                             </SelectTrigger>
@@ -435,7 +437,7 @@ export function BooksTab() {
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="all">All Genres</SelectItem>
-                                        {genres.map(genre => (
+                                        {genres.map((genre: Genre) => (
                                             <SelectItem key={genre.id} value={genre.id}>
                                                 {genre.name}
                                             </SelectItem>
@@ -539,7 +541,7 @@ export function BooksTab() {
                                 <span className="text-sm text-muted-foreground">Select all</span>
                             </div>
 
-                            {books.map((book) => (
+                            {books.map((book: Book) => (
                                 <Card key={book.id} className="p-4 hover:shadow-sm transition-shadow">
                                     <div className="flex items-start gap-4">
                                         <Switch
@@ -665,7 +667,7 @@ export function BooksTab() {
                     ) : (
                         // Grid View
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {books.map((book) => (
+                            {books.map((book: Book) => (
                                 <Card key={book.id} className="p-4 hover:shadow-md transition-shadow">
                                     <div className="space-y-3">
                                         <div className="flex items-start justify-between">

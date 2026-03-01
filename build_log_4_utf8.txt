@@ -1,0 +1,87 @@
+﻿
+> pothpath@0.1.0 build C:\Users\Soap\Documents\elibrary-pothpath
+> next build --turbopack
+
+   Γû▓ Next.js 15.5.3 (Turbopack)
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ Γ£ô Finished writing to disk in 60ms
+ Γ£ô Compiled successfully in 8.1s
+   Linting and checking validity of types ...
+node.exe : Failed to compile.
+At C:\Users\Soap\AppData\Roami
+ng\npm\pnpm.ps1:24 char:5
++     & "node$exe"  "$basedir/
+node_modules/pnpm/bin/pnpm.cjs
+" $args
++     ~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~
+    + CategoryInfo          : 
+    NotSpecified: (Failed to  
+   compile.:String) [], Rem   
+ oteException
+    + FullyQualifiedErrorId : 
+    NativeCommandError
+ 
+
+./src/components/admin/Analyti
+csTab.tsx:242:37
+Type error: Type '(props: { 
+name: string; percent: 
+number; }) => string' is not 
+assignable to type 'PieLabel 
+| undefined'.
+  Type '(props: { name: 
+string; percent: number; }) 
+=> string' is not assignable 
+to type '(props: 
+PieLabelRenderProps) => 
+ReactNode | 
+ReactElement<SVGElement, 
+string | 
+JSXElementConstructor<any>>'.
+    Types of parameters 
+'props' and 'props' are 
+incompatible.
+      Property 'percent' is 
+missing in type 
+'PieLabelRenderProps' but 
+required in type '{ name: 
+string; percent: number; }'.
+
+[0m [90m 240 |[39m         
+                            
+cy[33m=[39m[32m"50%"[39m
+ [90m 241 |[39m             
+                        labelL
+ine[33m=[39m{[36mfalse[39m
+}
+[31m[1m>[22m[39m[90m 242 
+|[39m                        
+             label[33m=[39m{
+(props[33m:[39m { 
+name[33m:[39m 
+string[33m,[39m 
+percent[33m:[39m number }) 
+[33m=>[39m 
+[32m`${props.name} 
+(${(props.percent * 
+100).toFixed(0)}%)`[39m}
+ [90m     |[39m             
+                        
+[31m[1m^[22m[39m
+ [90m 243 |[39m             
+                        outerR
+adius[33m=[39m{[35m80[39m}
+ [90m 244 |[39m             
+                        fill[
+33m=[39m[32m"#8884d8"[39m
+ [90m 245 |[39m             
+                        dataKe
+y[33m=[39m[32m"value"[39m
+[0m
+Next.js build worker exited 
+with code: 1 and signal: null
+ΓÇëELIFECYCLEΓÇë Command failed with exit code 1.

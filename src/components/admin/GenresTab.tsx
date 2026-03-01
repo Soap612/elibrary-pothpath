@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Edit, Trash2, Tag, Plus, Search, Filter, ArrowUpDown, Download, Upload } from "lucide-react";
+import { Edit, Trash2, Tag, Plus, Search, Filter, ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -37,10 +37,6 @@ type Genre = {
     book_count?: number;
 }
 
-type BookCountResult = {
-    genre_id: string;
-    book_count: number;
-}
 
 export function GenresTab() {
     const [genres, setGenres] = useState<Genre[]>([])

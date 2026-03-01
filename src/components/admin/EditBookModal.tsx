@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 import { supabase } from "@/lib/supabaseClient"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -33,15 +33,6 @@ type Book = {
     upload_by: string | null
     genres?: { name: string } | null
 }
-
-type AnalyticsBook = {
-    id: string
-    status: "pending" | "approved" | "rejected" | "archived"
-    genre_id: string | null
-    genres: { name: string } | null
-    download_count: number
-}
-
 
 export function EditBookModal({
     book,

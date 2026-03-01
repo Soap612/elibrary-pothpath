@@ -2,12 +2,11 @@
 "use client"
 
 import { useEffect, useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 
 export default function AuthCallback() {
     const router = useRouter()
-    const searchParams = useSearchParams()
     const [message, setMessage] = useState('Verifying your email...')
 
     useEffect(() => {

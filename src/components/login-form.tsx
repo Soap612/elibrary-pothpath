@@ -33,8 +33,8 @@ export function LoginForm({
       }
 
       console.log('Logged in successfully!');
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
     }
@@ -55,15 +55,15 @@ export function LoginForm({
 
       // Handle successful login, e.g., redirect or show success message
       console.log('Logged in with Google!');
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <form className={cn("flex flex-col gap-6", className)} {...props}>
+    <form className={cn("flex flex-col gap-6", className)} {...props} onSubmit={handleEmailLogin}>
       <div className="flex flex-col items-center gap-2 text-center">
         <h1 className="text-2xl font-bold">Login to your account</h1>
         <p className="text-muted-foreground text-sm text-balance">
@@ -87,6 +87,13 @@ export function LoginForm({
           </div>
           <Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
         </div>
+
+        {error && (
+          <div className="bg-destructive/15 text-destructive text-sm p-3 rounded-md">
+            {error}
+          </div>
+        )}
+
         <Button type="submit" className="w-full" disabled={loading}>
           {loading ? 'Loading...' : 'Login'}
         </Button>

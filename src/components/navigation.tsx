@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation"
 import Image from "next/image"
 import { useState } from "react"
 import { supabase } from "@/lib/supabaseClient"
+import type { User as SupabaseUser } from "@supabase/supabase-js"
 import { Button } from "@/components/ui/button"
 import { ModeToggle } from "@/components/mode-toggle"
 import {
@@ -31,7 +32,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 export function Navigation() {
     const pathname = usePathname()
     const [isMenuOpen, setIsMenuOpen] = useState(false)
-    const [user, setUser] = useState<any>(null)
+    const [user, setUser] = useState<SupabaseUser | null>(null)
 
     // Check if user is logged in
     React.useEffect(() => {

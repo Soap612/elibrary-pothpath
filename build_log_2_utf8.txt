@@ -1,0 +1,99 @@
+﻿
+> pothpath@0.1.0 build C:\Users\Soap\Documents\elibrary-pothpath
+> next build --turbopack
+
+   Γû▓ Next.js 15.5.3 (Turbopack)
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ Γ£ô Finished writing to disk in 83ms
+ Γ£ô Compiled successfully in 13.1s
+   Linting and checking validity of types ...
+node.exe : 
+At C:\Users\Soap\AppData\Roami
+ng\npm\pnpm.ps1:24 char:5
++     & "node$exe"  "$basedir/
+node_modules/pnpm/bin/pnpm.cjs
+" $args
++     ~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~
+    + CategoryInfo          : 
+    NotSpecified: (:String)   
+  [], RemoteException
+    + FullyQualifiedErrorId : 
+    NativeCommandError
+ 
+Failed to compile.
+
+./src/app/auth/callback/page.t
+sx
+10:11  Warning: 
+'searchParams' is assigned a 
+value but never used.  @typesc
+ript-eslint/no-unused-vars
+
+./src/app/profile/page.tsx
+13:5  Warning: 'User' is 
+defined but never used.  @type
+script-eslint/no-unused-vars
+19:5  Warning: 'Edit3' is 
+defined but never used.  @type
+script-eslint/no-unused-vars
+20:5  Warning: 'Save' is 
+defined but never used.  @type
+script-eslint/no-unused-vars
+21:5  Warning: 'X' is defined 
+but never used.  @typescript-e
+slint/no-unused-vars
+22:5  Warning: 'LogOut' is 
+defined but never used.  @type
+script-eslint/no-unused-vars
+55:12  Warning: 'editing' is 
+assigned a value but never 
+used.  @typescript-eslint/no-u
+nused-vars
+55:21  Warning: 'setEditing' 
+is assigned a value but never 
+used.  @typescript-eslint/no-u
+nused-vars
+56:12  Warning: 'saving' is 
+assigned a value but never 
+used.  @typescript-eslint/no-u
+nused-vars
+95:11  Warning: 
+'handleSaveProfile' is 
+assigned a value but never 
+used.  @typescript-eslint/no-u
+nused-vars
+101:11  Warning: 
+'handleLogout' is assigned a 
+value but never used.  @typesc
+ript-eslint/no-unused-vars
+218:67  Error: `'` can be 
+escaped with `&apos;`, 
+`&lsquo;`, `&#39;`, 
+`&rsquo;`.  
+react/no-unescaped-entities
+
+./src/components/admin/BooksTa
+b.tsx
+149:55  Error: Unexpected 
+any. Specify a different 
+type.  @typescript-eslint/no-e
+xplicit-any
+
+./src/components/login-form.ts
+x
+20:9  Warning: 
+'handleEmailLogin' is 
+assigned a value but never 
+used.  @typescript-eslint/no-u
+nused-vars
+
+info  - Need to disable some 
+ESLint rules? Learn more 
+here: https://nextjs.org/docs/
+app/api-reference/config/eslin
+t#disabling-rules
+ΓÇëELIFECYCLEΓÇë Command failed with exit code 1.

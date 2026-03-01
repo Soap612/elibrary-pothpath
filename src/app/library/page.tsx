@@ -69,12 +69,16 @@ function LibraryContent() {
 
   // fetch first page whenever filters change
   useEffect(() => {
-    fetchBooks(true)
+    // When filters change, we need to reset the fetched list. 
+    // We pass the current search term that triggered it.
+    fetchBooks(true, search)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, sort, genreId])
 
   // build query and fetch
-  async function fetchBooks(reset = false) {
+  async function fetchBooks(reset = false, searchArg?: string) {
+    const currentSearch = searchArg !== undefined ? searchArg : search
+
     if (reset) {
       setLoading(true)
       setBooks([])
@@ -84,6 +88,8 @@ function LibraryContent() {
     }
 
     try {
+      // Use existing state unless resetting
+      const existingBooks = reset ? [] : books
       let query = supabase
         .from("books")
         .select("*, genres(name)", { count: "exact" })
@@ -107,7 +113,7 @@ function LibraryContent() {
       if (!reset) {
         // If we only have local books currently, we fetch the next local page
         // But if we already have OpenLibrary books mixed in, local pagination is "done"
-        const localBooksCount = books.filter(b => !b.isOpenLibrary).length
+        const localBooksCount = existingBooks.filter(b => !b.isOpenLibrary).length
         from = localBooksCount
         to = from + PAGE_SIZE - 1
       }
@@ -118,7 +124,7 @@ function LibraryContent() {
 
       let newRows = (data || []) as BookRow[]
       let isLocalDone = false
-      let newTotalLocalCount = reset ? newRows.length : books.filter(b => !b.isOpenLibrary).length + newRows.length
+      const newTotalLocalCount = reset ? newRows.length : existingBooks.filter(b => !b.isOpenLibrary).length + newRows.length
 
       if (count !== null) {
         isLocalDone = newTotalLocalCount >= count
@@ -127,18 +133,20 @@ function LibraryContent() {
       }
 
       // If we are searching, and local results are short/done, try OpenLibrary!
-      if (search.trim() && (isLocalDone || newRows.length < PAGE_SIZE)) {
+      if (currentSearch.trim() && (isLocalDone || newRows.length < PAGE_SIZE)) {
         try {
           // Find how many pages of OpenLibrary we've already fetched
-          const openLibraryBooks = reset ? [] : books.filter(b => b.isOpenLibrary)
+          const openLibraryBooks = reset ? [] : existingBooks.filter(b => b.isOpenLibrary)
           // OpenLibrary pagination is 1-indexed for 'page'
           const openLibraryPage = Math.floor(openLibraryBooks.length / PAGE_SIZE) + 1
 
-          const olRes = await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(search.trim())}&page=${openLibraryPage}&limit=${PAGE_SIZE}`)
+          const limit = Math.max(PAGE_SIZE - newRows.length, PAGE_SIZE) // fetch enough to fill page
+
+          const olRes = await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(currentSearch.trim())}&page=${openLibraryPage}&limit=${limit}`)
           if (olRes.ok) {
             const olData = await olRes.json()
             if (olData.docs && olData.docs.length > 0) {
-              const olRows: BookRow[] = olData.docs.map((doc: any) => ({
+              const olRows: BookRow[] = olData.docs.map((doc: { key: string; title: string; author_name?: string[] }) => ({
                 id: `ol-${doc.key}`,
                 title: doc.title,
                 author: doc.author_name ? doc.author_name[0] : "Unknown Author",
@@ -152,11 +160,12 @@ function LibraryContent() {
 
               // Only add them if this API call adds new results not already in state
               newRows = [...newRows, ...olRows]
-              setHasMore(olData.numFound > openLibraryBooks.length + olRows.length)
+              setHasMore(olData.numFound > (openLibraryBooks.length + olRows.length))
             } else {
               setHasMore(false)
             }
           } else {
+            console.error("OL returned !ok")
             setHasMore(false)
           }
         } catch (olErr) {
@@ -167,7 +176,7 @@ function LibraryContent() {
         setHasMore(!isLocalDone)
       }
 
-      setBooks(reset ? newRows : [...books, ...newRows])
+      setBooks(reset ? newRows : [...existingBooks, ...newRows])
 
     } catch (err) {
       console.error("Error fetching books:", err)

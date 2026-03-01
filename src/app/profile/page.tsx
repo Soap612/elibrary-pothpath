@@ -10,16 +10,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import {
-    User,
     Mail,
     Calendar,
     Book,
     CloudUpload,
     Download,
-    Edit3,
-    Save,
-    X,
-    LogOut,
     Shield
 } from "lucide-react"
 
@@ -52,8 +47,6 @@ export default function ProfilePage() {
     const [user, setUser] = useState<UserProfile | null>(null)
     const [userBooks, setUserBooks] = useState<UserBook[]>([])
     const [loading, setLoading] = useState(true)
-    const [editing, setEditing] = useState(false)
-    const [saving, setSaving] = useState(false)
 
     useEffect(() => {
         const getProfile = async () => {
@@ -91,17 +84,6 @@ export default function ProfilePage() {
 
         getProfile()
     }, [router])
-
-    const handleSaveProfile = async () => {
-        if (!user) return
-
-        setSaving(true)
-    }
-
-    const handleLogout = async () => {
-        await supabase.auth.signOut()
-        router.push("/")
-    }
 
     const getInitials = (name: string, email: string) => {
         if (name) {
@@ -215,7 +197,7 @@ export default function ProfilePage() {
                                     Your Uploaded Books
                                 </CardTitle>
                                 <CardDescription>
-                                    Manage and track the books you've uploaded to Pothpath
+                                    Manage and track the books you&apos;ve uploaded to Pothpath
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>

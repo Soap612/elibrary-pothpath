@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabaseClient"
+import type { User as SupabaseUser } from "@supabase/supabase-js"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -52,7 +53,7 @@ export default function UploadPage() {
   const [loadingGenres, setLoadingGenres] = useState(true)
   const [uploading, setUploading] = useState(false)
   const [dragActive, setDragActive] = useState(false)
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<SupabaseUser | null>(null)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [currentStep, setCurrentStep] = useState<UploadStep>("details")
   const [isPublic, setIsPublic] = useState(true)
@@ -211,9 +212,10 @@ export default function UploadPage() {
       setCurrentStep("complete")
       toast.success("Book uploaded successfully! It's now pending approval.")
 
-    } catch (err: any) {
-      console.error("Upload failed:", err)
-      toast.error(`Upload failed: ${err.message}`)
+    } catch (err: unknown) {
+      const error = err as Error
+      console.error("Upload failed:", error)
+      toast.error(`Upload failed: ${error.message}`)
     } finally {
       setUploading(false)
     }
@@ -341,7 +343,7 @@ export default function UploadPage() {
                     <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
                     <h3 className="text-2xl font-bold mb-2">Upload Successful!</h3>
                     <p className="text-muted-foreground mb-6">
-                      Your book has been uploaded and is pending review. You'll be notified once it's approved.
+                      Your book has been uploaded and is pending review. You&apos;ll be notified once it&apos;s approved.
                     </p>
                     <div className="flex gap-3 justify-center">
                       <Button onClick={resetForm} variant="outline">
