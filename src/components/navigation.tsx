@@ -234,7 +234,7 @@ export function Navigation() {
                                             </Avatar>
                                             <div className="flex flex-col">
                                                 <span className="text-sm font-medium">{getDisplayName()}</span>
-                                                <span className="text-xs text-muted-foreground">{user?.raw_app_meta_data?.provider}</span>
+                                                <span className="text-xs text-muted-foreground">{user?.app_metadata?.provider}</span>
                                             </div>
                                         </div>
                                         <Link
