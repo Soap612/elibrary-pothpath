@@ -1,7 +1,9 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState, Suspense } from "react"
 import { supabase } from "@/lib/supabaseClient"
+import Image from "next/image"
+import { useSearchParams } from "next/navigation"
 import { motion } from "framer-motion"
 import {
   MagnifyingGlassIcon,
@@ -18,6 +20,8 @@ type BookRow = {
   file_url: string
   created_at?: string | null
   genres: { name: string } | null
+  isOpenLibrary?: boolean
+  openLibraryKey?: string
 }
 
 type Genre = { id: string; name: string }
@@ -25,16 +29,34 @@ type Genre = { id: string; name: string }
 const PAGE_SIZE = 12
 
 export default function LibraryPage() {
+  return (
+    <Suspense fallback={<div className="min-h-[calc(100vh-120px)] flex justify-center items-center">Loading Library...</div>}>
+      <LibraryContent />
+    </Suspense>
+  )
+}
+
+function LibraryContent() {
+  const searchParams = useSearchParams()
+  const initialSearch = searchParams.get('q') || ""
+  const initialGenre = searchParams.get('genreId') || ""
+
   const [books, setBooks] = useState<BookRow[]>([])
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
   const [hasMore, setHasMore] = useState(true)
 
   // filters
-  const [search, setSearch] = useState("")
+  const [search, setSearch] = useState(initialSearch)
   const [sort, setSort] = useState<"newest" | "oldest" | "az">("newest")
   const [genres, setGenres] = useState<Genre[]>([])
-  const [genreId, setGenreId] = useState<string>("")
+  const [genreId, setGenreId] = useState<string>(initialGenre)
+
+  // Update effect to grab the newest URL params if they change
+  useEffect(() => {
+    setSearch(searchParams.get('q') || "")
+    setGenreId(searchParams.get('genreId') || "")
+  }, [searchParams])
 
   // load genres once
   useEffect(() => {
@@ -78,21 +100,75 @@ export default function LibraryPage() {
       if (sort === "oldest") query = query.order("created_at", { ascending: true })
       if (sort === "az") query = query.order("title", { ascending: true })
 
-      // pagination range
-      const from = reset ? 0 : books.length
-      const to = from + PAGE_SIZE - 1
+      let from = 0
+      let to = PAGE_SIZE - 1
+
+      // Calculate properly what page to fetch for local database pagination vs openlibrary pagination
+      if (!reset) {
+        // If we only have local books currently, we fetch the next local page
+        // But if we already have OpenLibrary books mixed in, local pagination is "done"
+        const localBooksCount = books.filter(b => !b.isOpenLibrary).length
+        from = localBooksCount
+        to = from + PAGE_SIZE - 1
+      }
+
       const { data, error, count } = await query.range(from, to)
 
       if (error) throw error
 
-      const newRows = (data || []) as BookRow[]
-      setBooks(reset ? newRows : [...books, ...newRows])
+      let newRows = (data || []) as BookRow[]
+      let isLocalDone = false
+      let newTotalLocalCount = reset ? newRows.length : books.filter(b => !b.isOpenLibrary).length + newRows.length
 
       if (count !== null) {
-        setHasMore((reset ? newRows.length : books.length + newRows.length) < count)
+        isLocalDone = newTotalLocalCount >= count
       } else {
-        setHasMore(newRows.length === PAGE_SIZE)
+        isLocalDone = newRows.length < PAGE_SIZE
       }
+
+      // If we are searching, and local results are short/done, try OpenLibrary!
+      if (search.trim() && (isLocalDone || newRows.length < PAGE_SIZE)) {
+        try {
+          // Find how many pages of OpenLibrary we've already fetched
+          const openLibraryBooks = reset ? [] : books.filter(b => b.isOpenLibrary)
+          // OpenLibrary pagination is 1-indexed for 'page'
+          const openLibraryPage = Math.floor(openLibraryBooks.length / PAGE_SIZE) + 1
+
+          const olRes = await fetch(`https://openlibrary.org/search.json?q=${encodeURIComponent(search.trim())}&page=${openLibraryPage}&limit=${PAGE_SIZE}`)
+          if (olRes.ok) {
+            const olData = await olRes.json()
+            if (olData.docs && olData.docs.length > 0) {
+              const olRows: BookRow[] = olData.docs.map((doc: any) => ({
+                id: `ol-${doc.key}`,
+                title: doc.title,
+                author: doc.author_name ? doc.author_name[0] : "Unknown Author",
+                description: "Available from OpenLibrary online catalog.",
+                file_url: `https://openlibrary.org${doc.key}`,
+                created_at: null,
+                genres: { name: "External" },
+                isOpenLibrary: true,
+                openLibraryKey: doc.key
+              }))
+
+              // Only add them if this API call adds new results not already in state
+              newRows = [...newRows, ...olRows]
+              setHasMore(olData.numFound > openLibraryBooks.length + olRows.length)
+            } else {
+              setHasMore(false)
+            }
+          } else {
+            setHasMore(false)
+          }
+        } catch (olErr) {
+          console.error("OpenLibrary fetch error:", olErr)
+          setHasMore(false) // Give up on external results gracefully
+        }
+      } else {
+        setHasMore(!isLocalDone)
+      }
+
+      setBooks(reset ? newRows : [...books, ...newRows])
+
     } catch (err) {
       console.error("Error fetching books:", err)
       if (reset) setBooks([])
@@ -143,7 +219,10 @@ export default function LibraryPage() {
           className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6"
         >
           <div>
-            <h1 className="text-3xl font-extrabold tracking-tight">📚 Pothpath Library</h1>
+            <h1 className="text-3xl font-extrabold tracking-tight flex items-center gap-3">
+              <Image src="/logo.png" alt="Logo" width={40} height={40} className="object-contain" />
+              Pothpath Library
+            </h1>
             <p className="text-sm">Explore approved books. Use search and filters to find what you want.</p>
           </div>
           <div className="text-sm">
@@ -255,24 +334,28 @@ export default function LibraryPage() {
                         className="inline-flex items-center gap-2 px-3 py-2 text-sm rounded-md bg-primary-foreground hover:bg-primary"
                       >
                         <DocumentTextIcon className="w-5 h-5" />
-                        View PDF
+                        {book.isOpenLibrary ? "Open in OpenLibrary" : "View PDF"}
                       </a>
 
-                      <a
-                        href={book.file_url}
-                        download
-                        className="inline-flex items-center gap-2 px-3 py-2 text-sm rounded-md border"
-                      >
-                        <ArrowDownTrayIcon className="w-5 h-5" />
-                        Download
-                      </a>
+                      {!book.isOpenLibrary && (
+                        <a
+                          href={book.file_url}
+                          download
+                          className="inline-flex items-center gap-2 px-3 py-2 text-sm rounded-md border"
+                        >
+                          <ArrowDownTrayIcon className="w-5 h-5" />
+                          Download
+                        </a>
+                      )}
 
-                      <button
-                        onClick={() => onCopy(book.file_url)}
-                        className="ml-auto text-xs text-blue-500 hover:text-blue-700"
-                      >
-                        Copy link
-                      </button>
+                      {!book.isOpenLibrary && (
+                        <button
+                          onClick={() => onCopy(book.file_url)}
+                          className="ml-auto text-xs text-blue-500 hover:text-blue-700"
+                        >
+                          Copy link
+                        </button>
+                      )}
                     </div>
                   </div>
                 </motion.li>

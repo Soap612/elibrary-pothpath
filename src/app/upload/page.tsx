@@ -20,7 +20,8 @@ import {
   BookOpen,
   Tag,
   FileCheck,
-  Shield
+  Shield,
+  Search
 } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
@@ -43,6 +44,8 @@ export default function UploadPage() {
   const [title, setTitle] = useState("")
   const [author, setAuthor] = useState("")
   const [description, setDescription] = useState("")
+  const [searchQuery, setSearchQuery] = useState("")
+  const [isSearchingOpenLibrary, setIsSearchingOpenLibrary] = useState(false)
   const [file, setFile] = useState<File | null>(null)
   const [genres, setGenres] = useState<Genre[]>([])
   const [genreId, setGenreId] = useState<string>("")
@@ -237,6 +240,46 @@ export default function UploadPage() {
     setCurrentStep("details")
   }
 
+  const searchOpenLibrary = async () => {
+    if (!searchQuery.trim()) {
+      toast.error("Please enter a book title, author, or ISBN to search")
+      return
+    }
+
+    setIsSearchingOpenLibrary(true)
+    try {
+      const response = await fetch(
+        `https://openlibrary.org/search.json?q=${encodeURIComponent(searchQuery)}&limit=1`
+      )
+
+      if (!response.ok) {
+        throw new Error(`HTTP Error: ${response.status}`)
+      }
+
+      const data = await response.json()
+
+      if (data.docs && data.docs.length > 0) {
+        const book = data.docs[0]
+        setTitle(book.title || "")
+        if (book.author_name && book.author_name.length > 0) {
+          setAuthor(book.author_name[0])
+          setFormErrors(prev => ({ ...prev, author: "" }))
+        } else {
+          setAuthor("")
+        }
+        setFormErrors(prev => ({ ...prev, title: "" }))
+        toast.success("Book details auto-filled successfully!")
+      } else {
+        toast.error("No books found matching your query")
+      }
+    } catch (err) {
+      console.error("OpenLibrary search error:", err)
+      toast.error("Failed to fetch data from OpenLibrary")
+    } finally {
+      setIsSearchingOpenLibrary(false)
+    }
+  }
+
   if (!user) {
     return (
       <div className="min-h-[calc(100vh-120px)] flex items-center justify-center">
@@ -314,6 +357,44 @@ export default function UploadPage() {
                     {/* Step 1: Book Details */}
                     {currentStep === "details" && (
                       <div className="space-y-6">
+
+                        {/* Auto-fill Section */}
+                        <div className="p-4 border rounded-lg bg-muted/30 space-y-3">
+                          <Label htmlFor="search" className="font-semibold flex items-center gap-2">
+                            <Search className="w-4 h-4" />
+                            Auto-fill with OpenLibrary
+                          </Label>
+                          <div className="flex gap-2">
+                            <Input
+                              id="search"
+                              placeholder="Search by title, author, or ISBN..."
+                              value={searchQuery}
+                              onChange={(e) => setSearchQuery(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault()
+                                  searchOpenLibrary()
+                                }
+                              }}
+                            />
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              onClick={searchOpenLibrary}
+                              disabled={isSearchingOpenLibrary}
+                            >
+                              {isSearchingOpenLibrary ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                "Search"
+                              )}
+                            </Button>
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            Quickly populate title and author by searching the OpenLibrary database.
+                          </p>
+                        </div>
+
                         <div className="space-y-2">
                           <Label htmlFor="title" className="flex items-center gap-2">
                             <BookOpen className="w-4 h-4" />

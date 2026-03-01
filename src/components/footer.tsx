@@ -6,6 +6,7 @@ import {
     TwitterIcon,
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 const footerLinks = [
     {
@@ -28,7 +29,10 @@ const Footer = () => {
             <div className="max-w-(--breakpoint-xl) mx-auto">
                 <div className="py-12 flex flex-col justify-start items-center">
                     {/* Logo */}
-                    📚 Pothpath
+                    <div className="flex items-center gap-2 font-bold text-xl">
+                        <Image src="/logo.png" alt="Pothpath Logo" width={40} height={40} className="object-contain" />
+                        Pothpath
+                    </div>
                     <ul className="mt-6 flex items-center gap-4 flex-wrap">
                         {footerLinks.map(({ title, href }) => (
                             <li key={title}>

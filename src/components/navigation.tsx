@@ -3,6 +3,7 @@
 import React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import Image from "next/image"
 import { useState } from "react"
 import { supabase } from "@/lib/supabaseClient"
 import { Button } from "@/components/ui/button"
@@ -91,7 +92,8 @@ export function Navigation() {
                 <div className="flex justify-between items-center h-16">
                     {/* Logo */}
                     <Link href="/" className="flex items-center gap-2 font-bold text-xl">
-                        📚 Pothpath
+                        <Image src="/logo.png" alt="Pothpath Logo" width={32} height={32} className="object-contain" />
+                        Pothpath
                     </Link>
 
                     {/* Desktop Navigation */}
